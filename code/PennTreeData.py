@@ -11,6 +11,7 @@ class PennTreeData(Dataset):
         self.data_size, self.vocab_size  = len(self.data), len(self.vocab) 
         self.word2idx= {w:i for i,w in enumerate(self.vocab)}
         self.idx2word = {i:w for i,w in enumerate(self.vocab)}
+        
 
     def __getitem__(self, idx):
         offset = np.random.randint(0, len(self.data)-self.seq_length-2)
@@ -31,7 +32,7 @@ class PennTreeData(Dataset):
         return out
 
     def convert_to_string(self, char_idx):
-        return ''.join(self.idx2word[idx] for idx in char_idx)
+        return ' '.join(self.idx2word[idx] for idx in char_idx)
 
     def convert_to_idx(self, chars):
         return [self.word2idx[char] for char in chars]
