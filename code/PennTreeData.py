@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from collections import Counter
 
 class PennTreeData(Dataset):
-    def __init__(self, data_path, rare_threshold):
+    def __init__(self, data_path, rare_threshold=1):
         self.rare_threshold = rare_threshold
         self.data = self.remove_tags(open(data_path, "r").read())
         self.SOS = "|new"
