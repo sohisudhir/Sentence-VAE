@@ -15,7 +15,7 @@ from PennTreeData import PennTreeData
 from RNNLM import RNNLM
 
 
-TEXT_FILE = "../data/23.auto.clean"
+TEXT_FILE = "../data/02-21.10way.clean"
 
 ################################################################################
 def calculate_perplexity(predictions, targets):
@@ -27,12 +27,10 @@ def temperature_sample(h, temperature):
     distribution = torch.softmax(h/temperature, dim=0)    
     return torch.multinomial(distribution,1).item()
 
-def generate_samples(model, vocab_size, device, temperature = 0.5, method = "greedy"):
-    x = torch.randint(low=0,
-                  high=vocab_size,
-                  size=(1, 1),
+def generate_samples(model, dataset, device, temperature = 0.5, method = "greedy"):
+    x = torch.tensor(dataset.word2idx[dataset.SOS],
                   dtype=torch.long,
-                  device=device)
+                  device=device).view(-1,1)
     hidden = None
     with torch.no_grad():
         generated_sentence = [x.item()]
@@ -72,11 +70,11 @@ def train(config):
     print(device)
 
     # Initialize the dataset and data loader (note the +1)
-    dataset = PennTreeData(TEXT_FILE, config.seq_length)
+    dataset = PennTreeData(TEXT_FILE, rare_threshold=1)
     data_loader = DataLoader(dataset, config.batch_size, num_workers=1)
     
     # Initialize the model that we are going to use
-    model = RNNLM(seq_length=config.seq_length,
+    model = RNNLM(seq_length=dataset.max_sentence_len,
                   embedding_dim=config.embedding_dim,
                   vocabulary_size=dataset.vocab_size,
                   lstm_num_hidden=config.lstm_num_hidden,
@@ -94,10 +92,10 @@ def train(config):
     losses = []
     accuracies = []
     for epoch in range(config.n_epochs):
-        for step, (batch_inputs, batch_targets) in enumerate(data_loader):
+        for step, (batch, _) in enumerate(data_loader):
             # Only for time measurement of step through network
             t1 = time.time()
-
+            batch_inputs, batch_targets = batch
             batch_inputs = torch.stack(batch_inputs).to(device)
             batch_targets = torch.stack(batch_targets).to(device).view(-1)
             output, _ = model(batch_inputs)
@@ -127,9 +125,9 @@ def train(config):
                         accuracy, loss
                 ))
 
-            if step % config.sample_every == 0:
+            if step % config.sample_every == 0:                
                 generated_sample = generate_samples(model,
-                                                    vocab_size=dataset.vocab_size,
+                                                    dataset=dataset,
                                                     device=device,
                                                     temperature=config.temperature,
                                                     method=config.sample_method)
