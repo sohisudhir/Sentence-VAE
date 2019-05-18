@@ -41,7 +41,7 @@ class PennTreeData(Dataset):
         # add padding
         inputs.extend([self.word2idx[self.pad] for i in range(self.max_sentence_len - len(inputs))])
         targets.extend([self.word2idx[self.pad] for i in range(self.max_sentence_len - len(targets))])
-        return inputs, targets
+        return inputs, targets, len(sentence)
 
     def read_sentence(self):
         sentence = [self.SOS]
