@@ -18,6 +18,12 @@ from RNNLM import RNNLM
 TEXT_FILE = "../data/02-21.10way.clean"
 
 ################################################################################
+def calculate_accuracy(predictions, targets):
+    accurates = torch.argmax(predictions, dim=1) == targets
+    accuracy = accurates.type(torch.FloatTensor).mean().item()
+
+    return accuracy
+
 def calculate_perplexity(predictions, targets):
     # TODO
     pass
@@ -101,8 +107,7 @@ def train(config):
             output, _ = model(batch_inputs)
 
             output = output.view(batch_inputs.size()[0]*batch_inputs.size()[1], -1)
-            # accuracy = calculate_accuracy(output, batch_targets)
-            accuracy = 0.0  #fix me
+            accuracy = calculate_accuracy(output ,batch_targets)
 
             loss = criterion(output, batch_targets)
             loss.backward()
