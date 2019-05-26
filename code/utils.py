@@ -4,7 +4,6 @@ from datetime import datetime
 import argparse
 
 import numpy as np
-from scipy.misc import logsumexp
 from matplotlib import pyplot as plt
 
 import torch
@@ -63,13 +62,34 @@ def generate_sentence(model, sentence, device, config):
     return out_sentence
 
 
-def run_epoch(model, train_data_loader, criterion, optimizer, device):
+def write_samples_to_file(f, model, dataset, device, seq_length):
+    greedy_sample = generate_samples(model, dataset, device, seq_length, temperature = 0.5, method = "greedy")
+    f.write("SAMPLE Greedy:{} \n ".format(dataset.convert_to_string(greedy_sample)))
+    for sample in range(10):
+        temp_1 = generate_samples(model, dataset, device, seq_length, temperature = 0.5, method = "temp")
+        temp_2 = generate_samples(model, dataset, device, seq_length, temperature = 1, method = "temp")
+        temp_3 = generate_samples(model, dataset, device, seq_length, temperature = 2, method = "temp")
+        f.write("SAMPLE Temp 0.5:{} \n ".format(dataset.convert_to_string(temp_1)))
+        f.write("SAMPLE Temp 1:{} \n ".format(dataset.convert_to_string(temp_2)))
+        f.write("SAMPLE Temp 2:{} \n ".format(dataset.convert_to_string(temp_3))) 
+    f.write("\n")
+
+
+def make_plot(train, eval, name):
+    plt.plot(train, label = "Train {}".format(name))
+    plt.plot(eval, label = "Eval {}".format(name))
+    plt.legend()
+    plt.savefig("../plots/BenchMark_{}.eps".format(name))
+    plt.close()
+
+
+def run_epoch(model, data_loader, criterion, optimizer, device):
     negative_lls = []
     accuracies = []
     negative_ll = 0
     denominator = 0
     
-    for step, (batch, sentence_len) in enumerate(train_data_loader):
+    for step, (batch, sentence_len) in enumerate(data_loader):
     
         batch_inputs, batch_targets = batch
         batch_inputs = torch.stack(batch_inputs).to(device)
@@ -83,7 +103,7 @@ def run_epoch(model, train_data_loader, criterion, optimizer, device):
         
         negative_ll += loss.item()
         denominator += torch.sum(sentence_len).item()
-        print("PERPLEXITY: ", np.exp(negative_ll / denominator))
+        
         if model.training:
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=10.0)
@@ -92,6 +112,7 @@ def run_epoch(model, train_data_loader, criterion, optimizer, device):
 
         accuracies.append(accuracy)
         negative_lls.append(negative_ll)
+
     perplexity = np.exp(negative_ll / denominator)
 
     return np.mean(accuracies), np.mean(negative_lls), perplexity
