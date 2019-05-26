@@ -83,7 +83,7 @@ def run_epoch(model, train_data_loader, criterion, optimizer, device):
         
         negative_ll += loss.item()
         denominator += torch.sum(sentence_len).item()
-        
+        print("PERPLEXITY: ", np.exp(negative_ll / denominator))
         if model.training:
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=10.0)
@@ -92,6 +92,6 @@ def run_epoch(model, train_data_loader, criterion, optimizer, device):
 
         accuracies.append(accuracy)
         negative_lls.append(negative_ll)
-        perplexity = np.exp(negative_ll / denominator)
+    perplexity = np.exp(negative_ll / denominator)
 
     return np.mean(accuracies), np.mean(negative_lls), perplexity
