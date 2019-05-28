@@ -44,34 +44,24 @@ def generate_samples(model, dataset, device, seq_length, temperature = 0.5, meth
     return generated_sentence
 
 
-def generate_sentence(model, sentence, device, config):
-    out_sentence = [char for char in sentence]
-    with torch.no_grad():
-        hidden = None
-        sentence = torch.tensor(sentence, dtype=torch.long, device=device).unsqueeze(1)
-        out, hidden = model(sentence, hidden)
-        last_char = out[-1, : , :].squeeze()
-        last_char = torch.argmax(last_char).unsqueeze(0).unsqueeze(0)
-
-        for char in range(config.chars_to_generate):
-            out, hidden = model(last_char, hidden)
-            last_char = out[-1, : , :].squeeze()
-            last_char = torch.argmax(last_char).unsqueeze(0).unsqueeze(0)
-            
-            out_sentence.append(last_char.item())
-    return out_sentence
-
-
 def write_samples_to_file(f, model, dataset, device, seq_length):
     greedy_sample = generate_samples(model, dataset, device, seq_length, temperature = 0.5, method = "greedy")
     f.write("SAMPLE Greedy:{} \n ".format(dataset.convert_to_string(greedy_sample)))
     for sample in range(10):
-        temp_1 = generate_samples(model, dataset, device, seq_length, temperature = 0.5, method = "temp")
-        temp_2 = generate_samples(model, dataset, device, seq_length, temperature = 1, method = "temp")
-        temp_3 = generate_samples(model, dataset, device, seq_length, temperature = 2, method = "temp")
-        f.write("SAMPLE Temp 0.5:{} \n ".format(dataset.convert_to_string(temp_1)))
-        f.write("SAMPLE Temp 1:{} \n ".format(dataset.convert_to_string(temp_2)))
-        f.write("SAMPLE Temp 2:{} \n ".format(dataset.convert_to_string(temp_3))) 
+        temp_01 = generate_samples(model, dataset, device, seq_length, temperature = 0.1, method = "temp")
+        temp_015 = generate_samples(model, dataset, device, seq_length, temperature = 0.15, method = "temp")
+        temp_002= generate_samples(model, dataset, device, seq_length, temperature = 0.2, method = "temp")
+        temp_0025 = generate_samples(model, dataset, device, seq_length, temperature = 0.25, method = "temp")
+        temp_0030 = generate_samples(model, dataset, device, seq_length, temperature = 0.30, method = "temp")
+        temp_0035 = generate_samples(model, dataset, device, seq_length, temperature = 0.35, method = "temp")
+        temp_05 = generate_samples(model, dataset, device, seq_length, temperature = 0.5, method = "temp")
+        f.write("SAMPLE Temp 0.1:{} \n ".format(dataset.convert_to_string(temp_01)))
+        f.write("SAMPLE Temp 0.15:{} \n ".format(dataset.convert_to_string(temp_015)))
+        f.write("SAMPLE Temp 0.20:{} \n ".format(dataset.convert_to_string(temp_002)))
+        f.write("SAMPLE Temp 0.25:{} \n ".format(dataset.convert_to_string(temp_0025)))
+        f.write("SAMPLE Temp 0.30:{} \n ".format(dataset.convert_to_string(temp_0030)))
+        f.write("SAMPLE Temp 0.35:{} \n ".format(dataset.convert_to_string(temp_0035)))
+        f.write("SAMPLE Temp 0.5:{} \n ".format(dataset.convert_to_string(temp_05)))     
     f.write("\n")
 
 
@@ -79,7 +69,7 @@ def make_plot(train, eval, name):
     plt.plot(train, label = "Train {}".format(name))
     plt.plot(eval, label = "Eval {}".format(name))
     plt.legend()
-    plt.savefig("../plots/BenchMark_{}.eps".format(name))
+    plt.savefig("../plots/BenchMark_3_{}.eps".format(name))
     plt.close()
 
 

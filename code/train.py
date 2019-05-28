@@ -49,11 +49,11 @@ def train(config):
     os.makedirs("../plots/", exist_ok=True)
     
     # Setup output file
-    f = open("../sample_results/benchmark_samples.txt", "w+")
+    f = open("../sample_results/benchmark_samples_3.txt", "w+")
 
     # Setup the loss and optimizer
     padding_index = train_dataset.word2idx[train_dataset.pad]
-    criterion = nn.CrossEntropyLoss(ignore_index=padding_index, reduction="sum")
+    criterion = nn.CrossEntropyLoss()
     optimizer = optim.RMSprop(model.parameters(), lr=config.learning_rate)
 
     train_nnl = []
@@ -94,7 +94,7 @@ def train(config):
         write_samples_to_file(f, model, train_dataset, device, config.seq_length)
 
         # Save Model
-        torch.save(model.state_dict(), "../checkpoints/checkpoint_{}.pt".format(epoch))
+        torch.save(model.state_dict(), "../checkpoints/checkpoint_3_{}.pt".format(epoch))
 
 
     print("Done Training") 
@@ -132,11 +132,11 @@ if __name__ == "__main__":
     parser.add_argument('--n_epochs', type=int, default=20, help='Number of training epochs')
 
     # Sample parameters
-    parser.add_argument('--seq_length', type=int, default=30, help='Length of a sample sentence')
+    parser.add_argument('--seq_length', type=int, default=50, help='Length of a sample sentence')
     parser.add_argument('--sample_method', type=str, default="greedy", help='sampling method for character generation')
     parser.add_argument('--temperature', type=float, default=0.5, help='temperature for non-greedy sampling')
-    parser.add_argument('--gen_sentence', type=str, default="Sleeping beauty is", help='sentence to start with generating')
-    parser.add_argument('--chars_to_generate', type=int, default=30, help='len of new sentence')
+    parser.add_argument('--sentence', type=str, default="Sleeping beauty is", help='sentence to start with generating')
+    parser.add_argument('--chars_to_generate', type=int, default=50, help='len of new sentence')
 
     config = parser.parse_args()
 

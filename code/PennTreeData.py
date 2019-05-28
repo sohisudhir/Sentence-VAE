@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from collections import Counter
 
 class BaseTreeData(Dataset):
-    def __init__(self, train_data_path="../data/02-21.10way.clean", rare_threshold=1):
+    def __init__(self, train_data_path="../data/02-21.10way.clean", rare_threshold=0):
         self.rare_threshold = rare_threshold
         self.base_data = self.remove_tags(open(train_data_path, "r").read())
         self.SOS = "|new"
