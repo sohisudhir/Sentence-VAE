@@ -53,7 +53,7 @@ def train(config):
 
     # Setup the loss and optimizer
     padding_index = train_dataset.word2idx[train_dataset.pad]
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(reduction="sum")
     optimizer = optim.RMSprop(model.parameters(), lr=config.learning_rate)
 
     train_nnl = []
